@@ -8,7 +8,7 @@
 #include <chrono>
 #include <iomanip>
 
-int calculatepathfromto(int from, int to, int side) {
+int calculate_path_from_to(int from, int to, int side) {
 	int xfrom = from % side;
 	int yfrom = from / side;
 
@@ -18,18 +18,18 @@ int calculatepathfromto(int from, int to, int side) {
 	return abs(xfrom - xto) + abs(yfrom - yto);
 }
 
-int calculatemanhdistance(std::vector<int> numbers, int indexofzero, int finalindexofzero,int side) {
+int calculate_manh_distance(std::vector<int> numbers, int index_of_zero, int final_index_of_zero,int side) {
 	int distance = 0;
 	for (int i = 0; i < numbers.size(); i++)
 	{
 		if (numbers[i] == 0) {
 			continue;
 		}
-		int targetindex = numbers[i] - 1;
-		if (finalindexofzero <= targetindex) {
-			targetindex++;
+		int target_index = numbers[i] - 1;
+		if (final_index_of_zero <= target_index) {
+			target_index++;
 		}
-		distance = distance + calculatepathfromto(i, targetindex,side);
+		distance = distance + calculate_path_from_to(i, targetindex,side);
 	}
 	return distance;
 }
@@ -38,13 +38,13 @@ class Table {
 public:
 	std::vector<int> numbers;
 	int side;
-	int manhdist;
+	int manh_dist;
 	Table* parent;
-	int indexofzero;
-	int finalindexofzero;
+	int index_of_zero;
+	int final_index_of_zero;
 	std::string move;
 
-	void printtable() const {
+	void print_table() const {
 		int index = 0;
 		for (int i = 0; i < side; i++) {
 			for (int j = 0; j < side; j++) {
@@ -54,56 +54,56 @@ public:
 		}
 	}
 
-	Table(std::vector<int> numbers, int side, Table* parent,int indexofzero,int finalindexofzero,std::string move) {
+	Table(std::vector<int> numbers, int side, Table* parent,int index_of_zero,int final_index_of_zero,std::string move) {
 		this->numbers = numbers;
 		this->side = side;
 		this->parent = parent;
-		this->indexofzero = indexofzero;
-		this->finalindexofzero = finalindexofzero;
-		this->manhdist = calculatemanhdistance(numbers,indexofzero,finalindexofzero, side);
+		this->indexofzero = index_of_zero;
+		this->finalindexofzero = final_index_of_zero;
+		this->manhdist = calculatemanhdistance(numbers,index_of_zero,final_index_of_zero, side);
 		this->move = move;
 	}
 
 	bool issolved() const {
-		return manhdist == 0 && indexofzero == finalindexofzero;
+		return manh_dist == 0 && index_of_zero == final_index_of_zero;
 	}
 };
 
-bool ismovepossible(int newindexofzere, int indexofzero , int side) {
+bool is_move_possible(int new_index_of_zero, int index_of_zero , int side) {
 
-	if (newindexofzere<0 || newindexofzere >(side * side - 1)) {
+	if (new_index_of_zero<0 || new_index_of_zero >(side * side - 1)) {
 		return false;
 	}
-	int oldx = indexofzero % side;
-	int oldy = indexofzero / side;
-	return (abs(oldx - (newindexofzere % side)) + abs(oldy - (newindexofzere / side))) == 1;
+	int old_x = index_of_zero % side;
+	int old_y = index_of_zero / side;
+	return (abs(old_x - (new_index_of_zero % side)) + abs(old_y - (new_index_of_zero / side))) == 1;
 }
 
-std::vector<Table> generateneighbours(Table& t) {
+std::vector<Table> generate_neighbours(Table& t) {
 	std::vector<Table> neighbours;
 
-	static std::map<int, std::string> movesforpath = { {-1,"right"},
+	static std::map<int, std::string> moves_for_path = { {-1,"right"},
 													   {1,"left"},
 													   {t.side,"up"},
 													   {-t.side,"down"}};
 	static std::vector<int> moves = { -1,1,t.side,-t.side };
 	for (int i = 0; i < moves.size(); i++) {
-		std::vector<int> tempnumbers = t.numbers;
-		int newindexofzero = t.indexofzero + moves[i];
-		if (ismovepossible(newindexofzero, t.indexofzero, t.side)) {
-			std::swap(tempnumbers[t.indexofzero], tempnumbers[newindexofzero]);
+		std::vector<int> temp_numbers = t.numbers;
+		int new_index_of_zero = t.index_of_zero + moves[i];
+		if (is_move_possible(new_index_of_zero, t.index_of_zero, t.side)) {
+			std::swap(temp_numbers[t.index_of_zero], temp_numbers[new_index_of_zero]);
 
-			Table temptable = Table(tempnumbers, t.side, &t, newindexofzero, t.finalindexofzero,movesforpath.at(moves[i]));
+			Table temp_table = Table(temp_numbers, t.side, &t, new_index_of_zero, t.final_index_of_zero,moves_for_path.at(moves[i]));
 			
 			
 			if (t.parent != nullptr) {
-				if (tempnumbers != t.parent->numbers) {
-					neighbours.push_back(temptable);
+				if (temp_numbers != t.parent->numbers) {
+					neighbours.push_back(temp_table);
 				}
 			}
 			else
 			{
-				neighbours.push_back(temptable);
+				neighbours.push_back(temp_table);
 			}
 			
 		}
@@ -111,23 +111,23 @@ std::vector<Table> generateneighbours(Table& t) {
 
 	return neighbours;
 }
-int search(Table& t, int cost, int bound,int& finalcost, std::vector<std::string>& path) {
+int search(Table& t, int cost, int bound,int& final_cost, std::vector<std::string>& path) {
 
-	int f = cost + t.manhdist;
+	int f = cost + t.manh_dist;
 	if (f > bound) {
 		return f;
 	}
 	if (f == cost) {
 
 		path.push_back(t.move);
-		finalcost = cost;
+		final_cost = cost;
 		return -1;
 	}
 
-	int minbound = INT32_MAX;
-	std::vector<Table> nexttables = generateneighbours(t);
-	for (int i = 0; i < nexttables.size(); i++) {
-		int result = search(nexttables[i], cost + 1,bound,finalcost,path);
+	int min_bound = INT32_MAX;
+	std::vector<Table> next_tables = generate_neighbours(t);
+	for (int i = 0; i < next_tables.size(); i++) {
+		int result = search(next_tables[i], cost + 1,bound,final_cost,path);
 		if (result == -1) {
 			
 			if (t.move != "")
@@ -136,15 +136,15 @@ int search(Table& t, int cost, int bound,int& finalcost, std::vector<std::string
 			}
 			return -1;
 		}
-		minbound = std::min(minbound, result);
+		min_bound = std::min(min_bound, result);
 	}
-	return minbound;
+	return min_bound;
 }
 
-bool idastar(Table& t,int& finalcost,std::vector<std::string>& path) {
-	int bound = t.manhdist;
+bool ida_star(Table& t,int& final_cost,std::vector<std::string>& path) {
+	int bound = t.manh_dist;
 	while (true) {
-		int result = search(t, 0, bound,finalcost,path);
+		int result = search(t, 0, bound,final_cost,path);
 
 		if (result == -1) {
 			
@@ -157,7 +157,7 @@ bool idastar(Table& t,int& finalcost,std::vector<std::string>& path) {
 	}
 }
 
-int getnumberofinversions(std::vector<int>& table) {
+int get_number_of_inversions(std::vector<int>& table) {
 
 	int inversions = 0;
 
@@ -175,20 +175,20 @@ int getnumberofinversions(std::vector<int>& table) {
 	return inversions;
 }
 
-bool issolvable(std::vector<int>& table, int side, int zeroindex,int finalindex) {
+bool is_solvable(std::vector<int>& table, int side, int zero_index,int final_index) {
 
-	size_t inversions = getnumberofinversions(table);
+	size_t inversions = get_number_of_inversions(table);
 	if (side % 2 == 1) {
 		return (inversions % 2 == 0);
 	}
 	else {
-		size_t rowwherezerois = zeroindex / side;
+		size_t row_where_zero_is = zero_index / side;
 		if (inversions == 0) {
-			if ((finalindex / side) == rowwherezerois) {
+			if ((final_index / side) == row_where_zero_is) {
 				return true;
 			}
 		}
-		return ((inversions + rowwherezerois) % 2 == 1);
+		return ((inversions + row_where_zero_is) % 2 == 1);
 	}
 
 	return false;
@@ -200,23 +200,23 @@ int main() {
 	std::cin >> n;
 	int side = sqrt(n + 1);
 
-	int emptypositiontarget;
-	std::cin >> emptypositiontarget;
-	if (emptypositiontarget == -1) {
-		emptypositiontarget = n;
+	int empty_position_target;
+	std::cin >> empty_position_target;
+	if (empty_position_target == -1) {
+		empty_position_target = n;
 	}
-	if (n % 2 == 1 && emptypositiontarget == (n / 2)) {
+	if (n % 2 == 1 && empty_position_target == (n / 2)) {
 		std::cout << -1;
 		return -1;
 	}
 	std::vector<int> table;
-	int zeroindex = 0;
+	int zero_index = 0;
 
 	for (int i = 0; i < n + 1; i++) {
 		int temp_num;
 		std::cin >> temp_num;
 		if (temp_num == 0) {
-			zeroindex = i;
+			zero_index = i;
 		}
 		table.push_back(temp_num);
 	}
@@ -224,11 +224,11 @@ int main() {
 
 	int steps = 0;
 	std::vector<std::string> path;
-	if (!issolvable(table, side, zeroindex, emptypositiontarget)) {
+	if (!issolvable(table, side, zero_index, empty_position_target)) {
 		std::cout << -1;
 		return -1;
 	}
-	Table t(table, side, nullptr, zeroindex, emptypositiontarget,"");
+	Table t(table, side, nullptr, zero_index, empty_position_target,"");
 	auto start = std::chrono::high_resolution_clock::now();
 	bool res = idastar(t, steps, path);
 	auto end = std::chrono::high_resolution_clock::now();
