@@ -58,13 +58,13 @@ public:
 		this->numbers = numbers;
 		this->side = side;
 		this->parent = parent;
-		this->indexofzero = index_of_zero;
-		this->finalindexofzero = final_index_of_zero;
-		this->manhdist = calculatemanhdistance(numbers,index_of_zero,final_index_of_zero, side);
+		this->index_ofzero = index_of_zero;
+		this->final_index_of_zero = final_index_of_zero;
+		this->manh_dist = calculate_manh_distance(numbers,index_of_zero,final_index_of_zero, side);
 		this->move = move;
 	}
 
-	bool issolved() const {
+	bool is_solved() const {
 		return manh_dist == 0 && index_of_zero == final_index_of_zero;
 	}
 };
